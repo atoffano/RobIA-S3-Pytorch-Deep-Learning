@@ -38,6 +38,8 @@ train_counter = {i: train_labels.count(i) for i in set(train_labels)}
 test_counter = {i: test_labels.count(i) for i in set(test_labels)}
 print("Train set class distribution:", train_counter)
 print("Test set class distribution:", test_counter)
+# Vérifier la distribution des classes permet d'éviter certains biais dans l'entraînement
+# Par exemple, si une classe est surreprésentée, le modèle pourrait apprendre à prédire cette classe plus souvent par simple biais statistique
 
 # Création des dataloaders
 train_loader = DataLoader(train_set, batch_size=264, shuffle=True)
@@ -60,7 +62,9 @@ class SimpleDenseNN(nn.Module):
         x = torch.relu(
             self.fc1(x)
         )  # On appelle le premier layer avec en sortie une fonction ReLU
-        x = self.dropout(x)  # Application du dropout
+        x = self.dropout(
+            x
+        )  # Application du dropout. L'idée est de désactiver aléatoirement des neurones pour éviter l'overfitting en forcant le réseau à apprendre des représentations plus robustes
         x = torch.relu(self.fc2(x))  # Deuxième layer avec ReLU
         x = self.dropout(x)
         x = self.fc3(x)  # Sortie
@@ -74,6 +78,7 @@ print(model)
 # fonction de loss pour multiclassification
 criterion = nn.CrossEntropyLoss()
 
+# Le choix de l'optimiseur est souvent empirique, Adam est un bon choix par défaut
 optimizer = optim.Adam(model.parameters(), lr=0.005)
 
 # Set up TensorBoard
