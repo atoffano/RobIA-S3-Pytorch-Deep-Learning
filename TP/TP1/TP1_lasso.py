@@ -3,8 +3,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from torch.utils.data import TensorDataset, DataLoader, random_split
 
-
-# Load the dataset
 df = pd.read_csv("house_price_regression_dataset.csv")
 df = df[
     [
@@ -18,9 +16,8 @@ df = df[
         "House_Price",
     ]
 ]
-df = df.dropna()  # I may have tweaked the dataset a bit
+df = df.dropna()
 
-# Define input features (X) and target (y)
 X = torch.tensor(
     df[
         [
@@ -39,12 +36,10 @@ y = torch.tensor(df["House_Price"].values, dtype=torch.float32).view(-1, 1)
 
 dataset = TensorDataset(X, y)
 
-# Split the data into training and testing sets
 train_size = int(0.8 * len(dataset))
 test_size = len(dataset) - train_size
 train_dataset, test_dataset = random_split(dataset, [train_size, test_size])
 
-# Create DataLoaders
 batch_size = 32
 train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
 test_loader = DataLoader(test_dataset, batch_size=len(test_dataset))
@@ -60,16 +55,14 @@ class MultilinearRegression(torch.nn.Module):
         return x @ self.weights + self.bias
 
 
-# Initialize model, loss function, and optimizer
 num_features = X.shape[1]
 model = MultilinearRegression(num_features)
 criterion = torch.nn.MSELoss()
 optimizer = torch.optim.Adam(model.parameters(), lr=0.05)
 
-# L1 regularization strength (hyperparameter)
-lambda_l1 = 1000000  # Adjust this value to control the amount of regularization
+# Lambda est le 'poids' de la régilarisation
+lambda_l1 = 1000000
 
-# Training loop with tracking of L1 penalty contribution
 num_epochs = 400
 train_losses = []
 test_losses = []
@@ -81,7 +74,6 @@ for epoch in range(num_epochs):
     total_train_loss = 0
     total_l1_penalty = 0
     for batch_X, batch_y in train_loader:
-        # Forward pass
         y_pred = model(batch_X)
         mse_loss = criterion(y_pred, batch_y)
 
